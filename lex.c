@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
@@ -26,6 +27,9 @@ Class : COP 3402 - System Software - Fall 2025
 Instructor : Dr . Jie Lin
 Due Date : Friday , October 3 , 2025 at 11:59 PM ET
 */
+
+#define MAX_WORD 11
+#define MAX_NUMBER 5
 
 typedef enum
 {
@@ -102,7 +106,7 @@ Token specialSymbolArr[] = {
     {";", semicolonsym},
     {".", periodsym}};
 
-int copySrcToArray(FILE *fp, char **arr, int *arrSize)
+int copySrcToArray (FILE *fp, char **arr, int *arrSize)
 {
     int curIndex = 0;
     while (1)
@@ -132,34 +136,42 @@ int copySrcToArray(FILE *fp, char **arr, int *arrSize)
     return curIndex;
 }
 
-int checkReservedWords(char *word, int reservedWordArrLen)
+int getToken (char *word, int reservedWordArrLen)
 {
     for (int j = 0; j < reservedWordArrLen; j++) // For the length of reserved words
     {
         if (strcmp(word, reservedWordArr[j].lexeme) == 0) // If the word is in reserved words print its token
         {
-            printf(" %d", reservedWordArr[j].token);
             return reservedWordArr[j].token; // Stops the loop once the word is found
         }
     }
-    return 0;
+    return identsym;
 }
 
-int checkSpecialSybols(char symbol, int specialSymbolArrLen)
+int getSingleSymbol (char symbol, int specialSymbolArrLen)
 {
     char s[2] = {symbol, '\0'};
     for (int j = 0; j < specialSymbolArrLen; j++)
     {
         if (strcmp(s, specialSymbolArr[j].lexeme) == 0)
         {
-            printf(" %d", specialSymbolArr[j].token);
-            return 1;
+            return specialSymbolArr[j].token;
         }
     }
-    return 0;
+    return skipsym;
 }
 
-int main()
+void addToken (Token *tokenList, int *tokenListIndex, char *lexeme, int token)
+{   
+    tokenList[*tokenListIndex].lexeme = malloc(strlen(lexeme) + 1);
+    strcpy(tokenList[*tokenListIndex].lexeme, lexeme);
+
+    tokenList[*tokenListIndex].token = token;
+
+    (*tokenListIndex)++;
+}
+
+int main ()
 {
     int reservedWordArrLen = sizeof(reservedWordArr) / sizeof(reservedWordArr[0]);
     int specialSymbolsArrLen = sizeof(specialSymbolArr) / sizeof(specialSymbolArr[0]);
@@ -187,6 +199,7 @@ int main()
 
     int charsRead = copySrcToArray(fp, &arr, &arrSize); // adds everything from src input file to array and return the last index
 
+    // Read the array
     for (int i = 0; i < charsRead; i++)
     {
         if (arr[i] == '/' && arr[i + 1] == '*') // Handles the comment delimiters
@@ -200,72 +213,143 @@ int main()
                 }
             }
         }
-
-        char word[50];
-        int wordIndex = 0;
-        if (isalpha(arr[i])) // If it is a letter
+        else if (isalpha(arr[i])) // If it is a letter
         {
-            while (isalnum(arr[i])) // iterates until anything other than a letter or num is found
+            char word[MAX_WORD + 1];
+            int wordIndex = 0;
+
+            while (isalpha(arr[i]) || isdigit(arr[i])) // Iterates until anything other than a letter or num is found
             {
-                word[wordIndex] = arr[i]; // Add char to word
+                if(wordIndex < MAX_WORD)
+                {
+                    word[wordIndex] = arr[i]; // Add chars to word until max word length
+                }
+
+                printf("%c", arr[i]);
+
                 i++;
                 wordIndex++;
             }
-            word[wordIndex] = '\0';
-            tokenList[tokenListIndex].lexeme = word;
-            printf("%s", word);
 
-            int tokenVal = checkReservedWords(word, reservedWordArrLen);
-
-            if (tokenVal == 0)
-            { // If it is not a word then it must be a identifier
-                printf(" %d", identsym);
-                tokenVal = identsym;
+            if (wordIndex >= MAX_WORD)
+            { // word is too long
+                addToken(tokenList, &tokenListIndex, "1", skipsym);
+                printf("\t%d", skipsym);
             }
+            else
+            {
+                int token = getToken(word, reservedWordArrLen);
 
-            tokenList[tokenListIndex].token = tokenVal;
-            tokenListIndex++;
-            printf("\n");
-        }
+                word[wordIndex] = '\0';
+                addToken(tokenList, &tokenListIndex, word, token);
 
-        //todo Check if it is a number
-
-        // First check for double char symbols
-        if (arr[i] == '<' && arr[i + 1] == '>') // neqsym
-        {
-            printf("%c%c", arr[i], arr[i + 1]);
-            printf(" %d", neqsym);
-            i++;
-        }
-        else if (arr[i] == '<' && arr[i + 1] == '=') // leqsym
-        {
-            printf("%c%c", arr[i], arr[i + 1]);
-            printf(" %d", leqsym);
-            i++;
-        }
-        else if (arr[i] == '>' && arr[i + 1] == '=') // geqsym
-        {
-            printf("%c%c", arr[i], arr[i + 1]);
-            printf(" %d", geqsym);
-            i++;
-        }
-        else if (arr[i] == ':' && arr[i + 1] == '=') // becomesym
-        {
-            printf("%c%c", arr[i], arr[i + 1]);
-            printf(" %d", becomessym);
-            i++;
-        }
-        else // otherwise search through single char symbols
-        {
-            printf("%c", arr[i]);
-            int isSymbol = checkSpecialSybols(arr[i], specialSymbolsArrLen);
-
-            if (!isSymbol)
-            { // If not a symbol then it must be a lexical error
-
+                printf("\t%d", token);
             }
         }
+        else if (isNum(arr[i])) // If it is a number
+        {
+            char number[MAX_NUMBER + 1];
+            int numberIndex = 0;
+
+            while(isNum(arr[i])) // Iterates until anything other than a num is found
+            {
+                if (numberIndex < MAX_NUMBER)
+                {
+                    number[numberIndex] = arr[i]; // Add numbers to number until max number length
+                }
+                
+                printf("%c", arr[i]);
+
+                i++;
+                numberIndex++;
+            }
+
+            if (numberIndex >= MAX_NUMBER)
+            { // number is too long
+                addToken(tokenList, &tokenListIndex, "1", skipsym);
+                printf("\t%d", skipsym);
+            }
+            else
+            {
+                number[numberIndex] = '\0';
+                addToken(tokenList, &tokenListIndex, number, numbersym);
+
+                printf("\t%d", numbersym);
+            }
+        }
+        else // Check if its a symbol
+        {
+            int canDouble = (i + 1 < arrSize);
+
+            if (arr[i] == '<' && canDouble) // Try double symbols first
+            {
+                if (arr[i + 1] == '>') 
+                {
+                    addToken(tokenList, &tokenListIndex, "<>", neqsym);
+                    printf("<>\t%d", neqsym);
+                }
+                else if (arr[i + 1] == '=') {
+                    addToken(tokenList, &tokenListIndex, "<=", leqsym);
+                    printf("<=\t%d", leqsym);
+                }
+            }
+            else if (arr[i] == '>' && canDouble)
+            {
+                if (arr[i + 1] == '=') 
+                {
+                    addToken(tokenList, &tokenListIndex, ">=", geqsym);
+                    printf(">=\t%d", geqsym);
+                }
+            }
+            else if (arr[i] == ':' && canDouble)
+            {
+                if (arr[i + 1] == '=') 
+                {
+                    addToken(tokenList, &tokenListIndex, ":=", becomessym);
+                    printf(":=\t%d", becomessym);
+                }
+            }
+            else
+            { // Try single symbols
+                int symbol = getSingleSymbol(arr[i], specialSymbolsArrLen);
+                
+                if (symbol == skipsym)
+                { // Symbol does not exist
+                    addToken(tokenList, &tokenListIndex, "1", symbol);
+                }
+                else
+                {
+                    char lexeme[2];
+
+                    lexeme[0] = arr[i];
+                    lexeme[1] = '\0';
+
+                    addToken(tokenList, &tokenListIndex, lexeme, symbol);
+                }
+                printf("%c\t%d", arr[i], symbol);
+            }
+        }
+        
         printf("\n");
     }
+
+    // Print the token list
+    printf("Token List:\n\n");
+    for (int i = 0; i < tokenListIndex; i++)
+    {
+        if (tokenList[i].token == identsym) // If its an identifier, print the identifier symbol and then the identifier
+        {
+            printf("2 %s ", tokenList[i].lexeme);
+        }
+        else if (tokenList[i].token == numbersym) // If its an number, print the number symbol and then the number
+        {
+            printf("3 %s ", tokenList[i].lexeme);
+        }
+        else // Otherwise, just print the token
+        {
+            printf("%d ", tokenList[i].token);
+        }
+    }
+
     return 0;
 }
