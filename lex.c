@@ -189,7 +189,7 @@ int main ()
     int tokenArrSize = 2;
     int tokenListIndex = 0;
     char *arr = malloc(sizeof(char) * arrSize); // Creates a dynamic array to store the input file
-    Token *tokenList = malloc(sizeof(char) * tokenArrSize);
+    Token *tokenList = malloc(sizeof(Token) * tokenArrSize);
 
     if (arr == NULL) // Check if allocation failed
     {
@@ -205,7 +205,7 @@ int main ()
         if (isspace((unsigned char)arr[i])) continue;
         if (arr[i] == '/' && arr[i + 1] == '*') // Handles the comment delimiters
         {
-            while (arr[i] != '*' && arr[i + 1] != '/')
+            while (!(arr[i] == '*' && arr[i + 1] == '/'))
             {
                 i++;
                 if (i >= charsRead) // No */ found to close the comment
@@ -221,16 +221,18 @@ int main ()
 
             while (isalpha(arr[i]) || isdigit(arr[i])) // Iterates until anything other than a letter or num is found
             {
-                if(wordIndex < MAX_WORD)
+                if(wordIndex <= MAX_WORD)
                 {
                     word[wordIndex] = arr[i]; // Add chars to word until max word length
                 }
                 printf("%c", arr[i]);
                 i++;
                 wordIndex++;
+                
             }
+            word[wordIndex] = '\0';
 
-            if (wordIndex >= MAX_WORD)
+            if (wordIndex > MAX_WORD)
             { // word is too long
                 addToken(tokenList, &tokenListIndex, "1", skipsym);
                 printf("\t%d", skipsym);
@@ -245,12 +247,12 @@ int main ()
                 printf("\t%d", token);
             }
         }
-        else if (isalnum(arr[i])) // If it is a number
+        else if (isdigit(arr[i])) // If it is a number
         {
             char number[MAX_NUMBER + 1];
             int numberIndex = 0;
 
-            while(isalnum(arr[i])) // Iterates until anything other than a num is found
+            while(isdigit(arr[i])) // Iterates until anything other than a num is found
             {
                 if (numberIndex < MAX_NUMBER)
                 {
@@ -263,7 +265,7 @@ int main ()
                 numberIndex++;
             }
 
-            if (numberIndex >= MAX_NUMBER)
+            if (numberIndex > MAX_NUMBER)
             { // number is too long
                 addToken(tokenList, &tokenListIndex, "1", skipsym);
                 printf("\t%d", skipsym);
@@ -286,10 +288,12 @@ int main ()
                 {
                     addToken(tokenList, &tokenListIndex, "<>", neqsym);
                     printf("<>\t%d", neqsym);
+                    i++;
                 }
                 else if (arr[i + 1] == '=') {
                     addToken(tokenList, &tokenListIndex, "<=", leqsym);
                     printf("<=\t%d", leqsym);
+                    i++;
                 }
             }
             else if (arr[i] == '>' && canDouble)
@@ -298,6 +302,7 @@ int main ()
                 {
                     addToken(tokenList, &tokenListIndex, ">=", geqsym);
                     printf(">=\t%d", geqsym);
+                    i++;
                 }
             }
             else if (arr[i] == ':' && canDouble)
@@ -306,6 +311,7 @@ int main ()
                 {
                     addToken(tokenList, &tokenListIndex, ":=", becomessym);
                     printf(":=\t%d", becomessym);
+                    i++;
                 }
             }
             else
