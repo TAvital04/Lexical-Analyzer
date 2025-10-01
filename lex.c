@@ -202,6 +202,7 @@ int main ()
     // Read the array
     for (int i = 0; i < charsRead; i++)
     {
+        if (isspace((unsigned char)arr[i])) continue;
         if (arr[i] == '/' && arr[i + 1] == '*') // Handles the comment delimiters
         {
             while (arr[i] != '*' && arr[i + 1] != '/')
@@ -224,9 +225,7 @@ int main ()
                 {
                     word[wordIndex] = arr[i]; // Add chars to word until max word length
                 }
-
                 printf("%c", arr[i]);
-
                 i++;
                 wordIndex++;
             }
@@ -246,12 +245,12 @@ int main ()
                 printf("\t%d", token);
             }
         }
-        else if (isNum(arr[i])) // If it is a number
+        else if (isalnum(arr[i])) // If it is a number
         {
             char number[MAX_NUMBER + 1];
             int numberIndex = 0;
 
-            while(isNum(arr[i])) // Iterates until anything other than a num is found
+            while(isalnum(arr[i])) // Iterates until anything other than a num is found
             {
                 if (numberIndex < MAX_NUMBER)
                 {
