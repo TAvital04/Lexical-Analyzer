@@ -230,6 +230,7 @@ int main ()
                 wordIndex++;
                 
             }
+            i--;
             word[wordIndex] = '\0';
 
             if (wordIndex > MAX_WORD)
@@ -240,10 +241,7 @@ int main ()
             else
             {
                 int token = getToken(word, reservedWordArrLen);
-
-                word[wordIndex] = '\0';
                 addToken(tokenList, &tokenListIndex, word, token);
-
                 printf("\t%d", token);
             }
         }
@@ -264,7 +262,8 @@ int main ()
                 i++;
                 numberIndex++;
             }
-
+            i--;
+            number[numberIndex] = '\0';
             if (numberIndex > MAX_NUMBER)
             { // number is too long
                 addToken(tokenList, &tokenListIndex, "1", skipsym);
@@ -272,15 +271,13 @@ int main ()
             }
             else
             {
-                number[numberIndex] = '\0';
                 addToken(tokenList, &tokenListIndex, number, numbersym);
-
                 printf("\t%d", numbersym);
             }
         }
         else // Check if its a symbol
         {
-            int canDouble = (i + 1 < arrSize);
+            int canDouble = (i + 1 < charsRead);
 
             if (arr[i] == '<' && canDouble) // Try double symbols first
             {
