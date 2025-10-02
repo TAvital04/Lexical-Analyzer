@@ -329,6 +329,7 @@ int main ()
                 if (symbol == skipsym)
                 { // Symbol does not exist
                     addToken(tokenList, &tokenListIndex, "1", symbol);
+                    printf("%c\tInvalid", arr[i]);
                 }
                 else
                 {
@@ -338,8 +339,9 @@ int main ()
                     lexeme[1] = '\0';
 
                     addToken(tokenList, &tokenListIndex, lexeme, symbol);
+                    printf("%c\t%d", arr[i], symbol);
                 }
-                printf("%c\t%d", arr[i], symbol);
+                
             }
         }
         
