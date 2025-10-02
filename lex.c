@@ -199,6 +199,15 @@ int main ()
 
     int charsRead = copySrcToArray(fp, &arr, &arrSize); // adds everything from src input file to array and return the last index
 
+    
+    // Prints the original src code
+    printf("Source Program:\n\n");
+    for (int i = 0; i < arrSize; i++){
+        printf("%c", arr[i]);
+    }
+    printf("\n\nLexeme Table:\n\n");
+    printf("lexeme\ttoken type\n");
+
     // Read the array
     for (int i = 0; i < charsRead; i++)
     {
@@ -213,6 +222,8 @@ int main ()
                     return 1;
                 }
             }
+            i += 2;
+            continue;
         }
         else if (isalpha(arr[i])) // If it is a letter
         {
@@ -267,7 +278,7 @@ int main ()
             if (numberIndex > MAX_NUMBER)
             { // number is too long
                 addToken(tokenList, &tokenListIndex, "1", skipsym);
-                printf("\t%d", skipsym);
+                printf("\tNumber too long");
             }
             else
             {
@@ -336,7 +347,7 @@ int main ()
     }
 
     // Print the token list
-    printf("Token List:\n\n");
+    printf("\n\nToken List:\n\n");
     for (int i = 0; i < tokenListIndex; i++)
     {
         if (tokenList[i].token == identsym) // If its an identifier, print the identifier symbol and then the identifier
