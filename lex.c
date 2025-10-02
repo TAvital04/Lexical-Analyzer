@@ -171,12 +171,19 @@ void addToken (Token *tokenList, int *tokenListIndex, char *lexeme, int token)
     (*tokenListIndex)++;
 }
 
-int main ()
+
+
+int main(int argc, char *argv[])
 {
     int reservedWordArrLen = sizeof(reservedWordArr) / sizeof(reservedWordArr[0]);
     int specialSymbolsArrLen = sizeof(specialSymbolArr) / sizeof(specialSymbolArr[0]);
 
-    FILE *fp = fopen("input.txt", "r"); // Open the file
+    if (argc != 2) {
+        fprintf(stderr, "Incorrect number of arguments\n");
+        return 1;
+    }
+
+    FILE *fp = fopen(argv[1], "r"); // Open the file
 
     if (fp == NULL) // If it cant be opened print error
     {
@@ -186,7 +193,7 @@ int main ()
 
     // Allocate space for two arrays one for the input file and one for the token list
     int arrSize = 2;                            // Set the initial size of the dynamic array
-    int tokenArrSize = 2;
+    int tokenArrSize = 500;
     int tokenListIndex = 0;
     char *arr = malloc(sizeof(char) * arrSize); // Creates a dynamic array to store the input file
     Token *tokenList = malloc(sizeof(Token) * tokenArrSize);
@@ -202,7 +209,7 @@ int main ()
     
     // Prints the original src code
     printf("Source Program:\n\n");
-    for (int i = 0; i < arrSize; i++){
+    for (int i = 0; i < charsRead; i++){
         printf("%c", arr[i]);
     }
     printf("\n\nLexeme Table:\n\n");
@@ -366,5 +373,7 @@ int main ()
         }
     }
 
+    free(arr);
+    free(tokenList);
     return 0;
 }
