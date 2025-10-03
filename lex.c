@@ -178,12 +178,12 @@ int main(int argc, char *argv[])
     int reservedWordArrLen = sizeof(reservedWordArr) / sizeof(reservedWordArr[0]);
     int specialSymbolsArrLen = sizeof(specialSymbolArr) / sizeof(specialSymbolArr[0]);
 
-    // if (argc != 2) {
-    //     fprintf(stderr, "Incorrect number of arguments\n");
-    //     return 1;
-    // }
+    if (argc != 2) {
+        fprintf(stderr, "Incorrect number of arguments\n");
+        return 1;
+    }
 
-    FILE *fp = fopen("input.txt", "r"); // Open the file
+    FILE *fp = fopen(argv[1], "r"); // Open the file
 
     if (fp == NULL) // If it cant be opened print error
     {
