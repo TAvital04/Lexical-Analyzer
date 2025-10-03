@@ -219,17 +219,13 @@ int main(int argc, char *argv[])
     for (int i = 0; i < charsRead; i++)
     {
         if (isspace((unsigned char)arr[i])) continue;
-        if (arr[i] == '/' && arr[i + 1] == '*') // Handles the comment delimiters
+        if (arr[i] == '/' && i + 1 < charsRead && arr[i + 1] == '*') // Handles the comment delimiters
         {
-            while (!(arr[i] == '*' && arr[i + 1] == '/'))
+            while (!(arr[i] == '*' && arr[i + 1] == '/') && i < charsRead)
             {
                 i++;
-                if (i >= charsRead) // No */ found to close the comment
-                {
-                    return 1;
-                }
             }
-            i ++;
+            i++;
             continue;
         }
         else if (isalpha(arr[i])) // If it is a letter
