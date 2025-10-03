@@ -219,14 +219,22 @@ int main(int argc, char *argv[])
     for (int i = 0; i < charsRead; i++)
     {
         if (isspace((unsigned char)arr[i])) continue;
-        if (arr[i] == '/' && arr[i + 1] == '*') // Handles the comment delimiters
+        if (i + 1 < charsRead && arr[i] == '/' && arr[i + 1] == '*') // Handles the comment delimiters
         {
-            while (!(arr[i] == '*' && arr[i + 1] == '/'))
+            int tmpIndex = i + 1;
+            while (i + 1 < charsRead && !(arr[i] == '*' && arr[i + 1] == '/'))
             {
                 i++;
                 if (i >= charsRead) // No */ found to close the comment
                 {
-                    return 1;
+                    addToken(tokenList, &tokenListIndex, "/", slashsym);
+                    tokenListIndex++;
+                    addToken(tokenList, &tokenListIndex, "*", multsym);
+                    tokenListIndex++;
+                    printf("/\t%d\n",slashsym);
+                    printf("*\t%d\n", multsym);
+                    i = tmpIndex;
+                    break;
                 }
             }
             i ++;
@@ -254,7 +262,7 @@ int main(int argc, char *argv[])
             if (wordIndex > MAX_WORD)
             { // word is too long
                 addToken(tokenList, &tokenListIndex, "1", skipsym);
-                printf("\t%d", skipsym);
+                printf("\tWord is too long");
             }
             else
             {
