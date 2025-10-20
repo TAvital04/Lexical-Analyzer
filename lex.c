@@ -106,7 +106,7 @@ Token specialSymbolArr[] = {
     {";", semicolonsym},
     {".", periodsym}};
 
-int copySrcToArray (FILE *fp, char **arr, int *arrSize)
+int copySrcToArray(FILE *fp, char **arr, int *arrSize)
 {
     int curIndex = 0;
     while (1)
@@ -136,7 +136,7 @@ int copySrcToArray (FILE *fp, char **arr, int *arrSize)
     return curIndex;
 }
 
-int getToken (char *word, int reservedWordArrLen)
+int getToken(char *word, int reservedWordArrLen)
 {
     for (int j = 0; j < reservedWordArrLen; j++) // For the length of reserved words
     {
@@ -148,7 +148,7 @@ int getToken (char *word, int reservedWordArrLen)
     return identsym;
 }
 
-int getSingleSymbol (char symbol, int specialSymbolArrLen)
+int getSingleSymbol(char symbol, int specialSymbolArrLen)
 {
     char s[2] = {symbol, '\0'};
     for (int j = 0; j < specialSymbolArrLen; j++)
@@ -161,8 +161,8 @@ int getSingleSymbol (char symbol, int specialSymbolArrLen)
     return skipsym;
 }
 
-void addToken (Token *tokenList, int *tokenListIndex, char *lexeme, int token)
-{   
+void addToken(Token *tokenList, int *tokenListIndex, char *lexeme, int token)
+{
     tokenList[*tokenListIndex].lexeme = malloc(strlen(lexeme) + 1);
     strcpy(tokenList[*tokenListIndex].lexeme, lexeme);
 
@@ -171,14 +171,13 @@ void addToken (Token *tokenList, int *tokenListIndex, char *lexeme, int token)
     (*tokenListIndex)++;
 }
 
-
-
 int main(int argc, char *argv[])
 {
     int reservedWordArrLen = sizeof(reservedWordArr) / sizeof(reservedWordArr[0]);
     int specialSymbolsArrLen = sizeof(specialSymbolArr) / sizeof(specialSymbolArr[0]);
 
-    if (argc != 2) {
+    if (argc != 2)
+    {
         fprintf(stderr, "Incorrect number of arguments\n");
         return 1;
     }
@@ -192,7 +191,7 @@ int main(int argc, char *argv[])
     }
 
     // Allocate space for two arrays one for the input file and one for the token list
-    int arrSize = 2;                            // Set the initial size of the dynamic array
+    int arrSize = 2; // Set the initial size of the dynamic array
     int tokenArrSize = 500;
     int tokenListIndex = 0;
     char *arr = malloc(sizeof(char) * arrSize); // Creates a dynamic array to store the input file
@@ -206,10 +205,10 @@ int main(int argc, char *argv[])
 
     int charsRead = copySrcToArray(fp, &arr, &arrSize); // adds everything from src input file to array and return the last index
 
-    
     // Prints the original src code
     printf("Source Program:\n\n");
-    for (int i = 0; i < charsRead; i++){
+    for (int i = 0; i < charsRead; i++)
+    {
         printf("%c", arr[i]);
     }
     printf("\n\nLexeme Table:\n\n");
@@ -218,28 +217,30 @@ int main(int argc, char *argv[])
     // Read the array
     for (int i = 0; i < charsRead; i++)
     {
-        if (isspace((unsigned char)arr[i])) continue;
-        if (i + 1 < charsRead && arr[i] == '/' && arr[i + 1] == '*') // Handles the comment delimiters
+        if (isspace((unsigned char)arr[i]))
+            continue;
+        if (i + 1 < charsRead && arr[i] == '/' && arr[i + 1] == '*')
         {
-            int tmpIndex = i + 1;
-            while (i + 1 < charsRead && !(arr[i] == '*' && arr[i + 1] == '/'))
+            int j = i + 2; // start scanning after /*
+            while (j + 1 < charsRead && !(arr[j] == '*' && arr[j + 1] == '/'))
             {
-                i++;
-                if (i >= charsRead) // No */ found to close the comment
-                {
-                    addToken(tokenList, &tokenListIndex, "/", slashsym);
-                    tokenListIndex++;
-                    addToken(tokenList, &tokenListIndex, "*", multsym);
-                    tokenListIndex++;
-                    printf("/\t%d\n",slashsym);
-                    printf("*\t%d\n", multsym);
-                    i = tmpIndex;
-                    break;
-                }
+                j++;
             }
-            i ++;
+
+            if (j + 1 >= charsRead)
+            {
+                addToken(tokenList, &tokenListIndex, "/", slashsym);
+                addToken(tokenList, &tokenListIndex, "*", multsym);
+                printf("/\t%d\n*\t%d\n", slashsym, multsym);
+                i = i + 1;
+            }
+            else
+            {
+                i = j + 1;
+            }
             continue;
         }
+
         else if (isalpha(arr[i])) // If it is a letter
         {
             char word[MAX_WORD + 1];
@@ -247,14 +248,13 @@ int main(int argc, char *argv[])
 
             while (isalpha(arr[i]) || isdigit(arr[i])) // Iterates until anything other than a letter or num is found
             {
-                if(wordIndex <= MAX_WORD)
+                if (wordIndex <= MAX_WORD)
                 {
                     word[wordIndex] = arr[i]; // Add chars to word until max word length
                 }
                 printf("%c", arr[i]);
                 i++;
                 wordIndex++;
-                
             }
             i--;
             word[wordIndex] = '\0';
@@ -276,13 +276,13 @@ int main(int argc, char *argv[])
             char number[MAX_NUMBER + 1];
             int numberIndex = 0;
 
-            while(isdigit(arr[i])) // Iterates until anything other than a num is found
+            while (isdigit(arr[i])) // Iterates until anything other than a num is found
             {
                 if (numberIndex < MAX_NUMBER)
                 {
                     number[numberIndex] = arr[i]; // Add numbers to number until max number length
                 }
-                
+
                 printf("%c", arr[i]);
 
                 i++;
@@ -307,13 +307,14 @@ int main(int argc, char *argv[])
 
             if (arr[i] == '<' && canDouble) // Try double symbols first
             {
-                if (arr[i + 1] == '>') 
+                if (arr[i + 1] == '>')
                 {
                     addToken(tokenList, &tokenListIndex, "<>", neqsym);
                     printf("<>\t%d", neqsym);
                     i++;
                 }
-                else if (arr[i + 1] == '=') {
+                else if (arr[i + 1] == '=')
+                {
                     addToken(tokenList, &tokenListIndex, "<=", leqsym);
                     printf("<=\t%d", leqsym);
                     i++;
@@ -321,7 +322,7 @@ int main(int argc, char *argv[])
             }
             else if (arr[i] == '>' && canDouble)
             {
-                if (arr[i + 1] == '=') 
+                if (arr[i + 1] == '=')
                 {
                     addToken(tokenList, &tokenListIndex, ">=", geqsym);
                     printf(">=\t%d", geqsym);
@@ -330,7 +331,7 @@ int main(int argc, char *argv[])
             }
             else if (arr[i] == ':' && canDouble)
             {
-                if (arr[i + 1] == '=') 
+                if (arr[i + 1] == '=')
                 {
                     addToken(tokenList, &tokenListIndex, ":=", becomessym);
                     printf(":=\t%d", becomessym);
@@ -340,7 +341,7 @@ int main(int argc, char *argv[])
             else
             { // Try single symbols
                 int symbol = getSingleSymbol(arr[i], specialSymbolsArrLen);
-                
+
                 if (symbol == skipsym)
                 { // Symbol does not exist
                     addToken(tokenList, &tokenListIndex, "1", symbol);
@@ -356,10 +357,9 @@ int main(int argc, char *argv[])
                     addToken(tokenList, &tokenListIndex, lexeme, symbol);
                     printf("%c\t%d", arr[i], symbol);
                 }
-                
             }
         }
-        
+
         printf("\n");
     }
 
